@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI ខ្មែរ - ប្រព័ន្ធវិភាគបុគ្គលិកលក្ខណៈស៊ីជម្រៅ</title>
+
+    <!-- PWA App Mode & Icon -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="MBTI ខ្មែរ">
+    <meta name="application-name" content="MBTI ខ្មែរ">
+    <meta name="theme-color" content="#7c3aed">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%237c3aed'/><text x='50' y='68' font-size='55' text-anchor='middle'>🧠</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%237c3aed'/><text x='50' y='68' font-size='55' text-anchor='middle'>🧠</text></svg>">
+
+    <!-- Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- ភ្ជាប់ CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="p-3 md:p-8 text-slate-800">
+
+    <div class="max-w-5xl mx-auto space-y-6">
+        <!-- Header -->
+        <header class="bg-white p-4 md:p-5 rounded-3xl shadow-sm border border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+                <span id="group-badge" class="px-3 py-0.5 text-xs font-semibold rounded-full bg-purple-100 text-purple-700">ក្រុមអ្នកវិភាគ (Analysts)</span>
+                <h1 class="text-xl md:text-2xl font-bold mt-1.5 text-slate-900">ប្រព័ន្ធវិភាគបុគ្គលិកលក្ខណៈ MBTI លម្អិត</h1>
+                <p class="text-xs text-slate-500 mt-0.5">ស្វែងយល់ពីប្រភេទទាំង ១៦ មុខងារខួរក្បាល ក្រាហ្វិក Radar និងតេស្ត ៨ សំណួរ</p>
+            </div>
+
+            <!-- ប៊ូតុង Dropdown ទាំង ៣ -->
+            <div class="flex flex-wrap items-center gap-2">
+                <!-- ១. តេស្ត & លទ្ធផល -->
+                <div class="relative inline-block">
+                    <button type="button" onclick="toggleMenu('menu-action', event)" class="px-4 py-2.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white text-xs md:text-sm font-semibold rounded-full transition flex items-center gap-1.5 shadow-sm">
+                        <span>🎯</span> តេស្ត &amp; លទ្ធផល <span class="text-[10px] opacity-80">▼</span>
+                    </button>
+                    <div id="menu-action" class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50">
+                        <button type="button" onclick="toggleQuizModal(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-violet-50 hover:text-violet-700 rounded-xl flex items-center gap-2">
+                            <span>🎯</span> ធ្វើតេស្ត (៨ សំណួរ)
+                        </button>
+                        <button type="button" onclick="copyResult(); closeAllMenus();" id="copy-btn" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-violet-50 hover:text-violet-700 rounded-xl flex items-center gap-2 mt-0.5">
+                            <span>📋</span> ចម្លងលទ្ធផល
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ២. រក្សាទុក (PDF / PNG) -->
+                <div class="relative inline-block">
+                    <button type="button" id="save-btn" onclick="toggleMenu('menu-save', event)" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs md:text-sm font-semibold rounded-full transition flex items-center gap-1.5 shadow-sm">
+                        <span>📥</span> រក្សាទុក <span class="text-[10px] opacity-80">▼</span>
+                    </button>
+                    <div id="menu-save" class="dropdown-menu hidden absolute right-0 mt-2 w-40 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50">
+                        <button type="button" onclick="saveAsPDF(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 rounded-xl flex items-center gap-2">
+                            <span>📄</span> PDF
+                        </button>
+                        <button type="button" onclick="saveAsPNG(); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 rounded-xl flex items-center gap-2 mt-0.5">
+                            <span>🖼️</span> PNG
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ៣. ពណ៌ប្រអប់ធំ -->
+                <div class="relative inline-block">
+                    <button type="button" onclick="toggleMenu('menu-theme', event)" class="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white text-xs md:text-sm font-semibold rounded-full transition flex items-center gap-1.5 shadow-sm">
+                        <span>🎨</span> ពណ៌ប្រអប់ធំ <span class="text-[10px] opacity-80">▼</span>
+                    </button>
+                    <div id="menu-theme" class="dropdown-menu hidden absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-50 space-y-0.5">
+                        <button type="button" onclick="setTheme('auto'); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2"><span>✨</span> ស្វ័យប្រវត្តិ (តាមក្រុម)</button>
+                        <button type="button" onclick="setTheme('ocean'); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-800 inline-block"></span> Ocean Slate</button>
+                        <button type="button" onclick="setTheme('sunset'); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-rose-500 inline-block"></span> Sunset Berry</button>
+                        <button type="button" onclick="setTheme('forest'); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-600 inline-block"></span> Forest Mint</button>
+                        <button type="button" onclick="setTheme('royal'); closeAllMenus();" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50 rounded-xl flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-violet-600 inline-block"></span> Royal Gold</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- ប៊ូតុងជ្រើសរើសទាំង ១៦ ប្រភេទ -->
+        <div class="bg-white p-4 rounded-3xl shadow-sm border border-slate-100">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <div class="bg-purple-50/70 p-2.5 rounded-2xl">
+                    <div class="text-[11px] font-bold text-purple-700 mb-1.5 px-1">អ្នកវិភាគ (NT)</div>
+                    <div class="grid grid-cols-4 gap-1">
+                        <button type="button" onclick="selectMBTI('INTJ')" id="btn-INTJ" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">INTJ</button>
+                        <button type="button" onclick="selectMBTI('INTP')" id="btn-INTP" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">INTP</button>
+                        <button type="button" onclick="selectMBTI('ENTJ')" id="btn-ENTJ" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ENTJ</button>
+                        <button type="button" onclick="selectMBTI('ENTP')" id="btn-ENTP" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ENTP</button>
+                    </div>
+                </div>
+                <div class="bg-emerald-50/70 p-2.5 rounded-2xl">
+                    <div class="text-[11px] font-bold text-emerald-700 mb-1.5 px-1">អ្នកការទូត (NF)</div>
+                    <div class="grid grid-cols-4 gap-1">
+                        <button type="button" onclick="selectMBTI('INFJ')" id="btn-INFJ" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">INFJ</button>
+                        <button type="button" onclick="selectMBTI('INFP')" id="btn-INFP" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">INFP</button>
+                        <button type="button" onclick="selectMBTI('ENFJ')" id="btn-ENFJ" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ENFJ</button>
+                        <button type="button" onclick="selectMBTI('ENFP')" id="btn-ENFP" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ENFP</button>
+                    </div>
+                </div>
+                <div class="bg-sky-50/70 p-2.5 rounded-2xl">
+                    <div class="text-[11px] font-bold text-sky-700 mb-1.5 px-1">អ្នកអភិរក្ស (SJ)</div>
+                    <div class="grid grid-cols-4 gap-1">
+                        <button type="button" onclick="selectMBTI('ISTJ')" id="btn-ISTJ" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ISTJ</button>
+                        <button type="button" onclick="selectMBTI('ISFJ')" id="btn-ISFJ" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ISFJ</button>
+                        <button type="button" onclick="selectMBTI('ESTJ')" id="btn-ESTJ" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ESTJ</button>
+                        <button type="button" onclick="selectMBTI('ESFJ')" id="btn-ESFJ" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ESFJ</button>
+                    </div>
+                </div>
+                <div class="bg-amber-50/70 p-2.5 rounded-2xl">
+                    <div class="text-[11px] font-bold text-amber-700 mb-1.5 px-1">អ្នកផ្សងព្រេង (SP)</div>
+                    <div class="grid grid-cols-4 gap-1">
+                        <button type="button" onclick="selectMBTI('ISTP')" id="btn-ISTP" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ISTP</button>
+                        <button type="button" onclick="selectMBTI('ISFP')" id="btn-ISFP" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ISFP</button>
+                        <button type="button" onclick="selectMBTI('ESTP')" id="btn-ESTP" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ESTP</button>
+                        <button type="button" onclick="selectMBTI('ESFP')" id="btn-ESFP" class="mbti-btn py-1.5 rounded-lg text-xs font-bold">ESFP</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bento Capture Area -->
+        <div id="bento-capture-area" class="grid grid-cols-1 md:grid-cols-4 gap-4 p-1 rounded-3xl">
+            <div id="main-card" class="bento-card md:col-span-2 md:row-span-2 bg-gradient-to-br from-purple-600 to-indigo-700 text-white rounded-3xl p-6 flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <span id="mbti-code" class="text-4xl md:text-5xl font-bold tracking-wider">INTP</span>
+                        <span id="mbti-icon" class="text-4xl">🧠</span>
+                    </div>
+                    <h2 id="mbti-title" class="text-xl font-semibold mt-2 text-white/95"></h2>
+                    <p id="mbti-desc" class="mt-4 text-sm md:text-base text-white/90 leading-relaxed"></p>
+                </div>
+                <div id="mbti-tags" class="mt-6 pt-4 border-t border-white/20 flex flex-wrap gap-2"></div>
+            </div>
+
+            <div class="bento-card md:col-span-2 md:row-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-900 mb-3 text-base">🧬 ប្រព័ន្ធដំណើរការខួរក្បាល (Cognitive Functions)</h3>
+                    <div id="mbti-functions" class="space-y-3 text-sm"></div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-100">
+                    <h4 class="font-bold text-slate-800 text-sm mb-2">💼 អាជីព និងជំនាញស័ក្តិសម</h4>
+                    <div id="mbti-jobs" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+
+            <div class="bento-card md:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="font-bold text-slate-900 flex items-center gap-2 text-base">
+                        <span>🕸️</span> ក្រាហ្វិកវិភាគសមត្ថភាព (Radar Chart)
+                    </h3>
+                    <span id="radar-badge" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-purple-50 text-purple-700">INTP</span>
+                </div>
+                <div class="relative w-full h-56 flex items-center justify-center">
+                    <canvas id="mbtiRadarChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bento-card md:col-span-2 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between">
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base mb-2">🤝 ភាពស៊ីចង្វាក់គ្នា (Compatibility)</h3>
+                    <p id="mbti-compatibility" class="text-sm text-slate-600 leading-relaxed"></p>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-100">
+                    <h4 class="font-bold text-slate-900 text-sm mb-1.5">🔍 របៀបគិត និងដោះស្រាយបញ្ហា</h4>
+                    <p id="mbti-logic" class="text-xs text-slate-600 leading-relaxed"></p>
+                </div>
+            </div>
+
+            <div class="bento-card md:col-span-2 bg-emerald-50/80 rounded-3xl p-5 border border-emerald-100">
+                <h3 class="font-bold text-emerald-950 text-base mb-1.5">🚀 ចំណុចខ្លាំង</h3>
+                <p id="mbti-strength" class="text-sm text-emerald-900 leading-relaxed"></p>
+            </div>
+
+            <div class="bento-card md:col-span-2 bg-rose-50/80 rounded-3xl p-5 border border-rose-100">
+                <h3 class="font-bold text-rose-950 text-base mb-1.5">⚠️ ចំណុចដែលគួរប្រយ័ត្ន</h3>
+                <p id="mbti-weakness" class="text-sm text-rose-900 leading-relaxed"></p>
+            </div>
+
+            <div class="bento-card md:col-span-4 bg-slate-900 text-white rounded-3xl p-6 flex items-start sm:items-center gap-4">
+                <div class="text-3xl bg-white/10 p-3 rounded-2xl shrink-0">💡</div>
+                <div>
+                    <h3 id="mbti-tip-title" class="font-bold text-base text-slate-100"></h3>
+                    <p id="mbti-tip" class="text-sm text-slate-300 mt-1 leading-relaxed"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ផ្នែកទី ២៖ រចនាសម្ព័ន្ធអក្សរទាំង ៤ គូ -->
+        <section>
+            <div onclick="toggleSection('four-pairs-content', 'four-pairs-arrow')" class="bento-card cursor-pointer bg-gradient-to-r from-white to-indigo-50/50 hover:to-indigo-50 rounded-3xl p-5 md:p-6 border border-indigo-100 shadow-sm flex items-center justify-between gap-4 select-none">
+                <div class="flex items-center gap-4">
+                    <div class="text-2xl md:text-3xl bg-indigo-100/80 text-indigo-600 p-3.5 rounded-2xl shrink-0">🧩</div>
+                    <div>
+                        <h2 class="text-base md:text-lg font-bold text-slate-900">រចនាសម្ព័ន្ធនៃអក្សរទាំង ៤ គូ</h2>
+                        <p class="text-xs md:text-sm text-slate-500 mt-0.5">ចុចត្រង់នេះ ដើម្បីមើលការបកស្រាយខ្ទង់ទាំង ៤ (E/I, S/N, T/F, J/P)</p>
+                    </div>
+                </div>
+                <div id="four-pairs-arrow" class="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 transition-transform duration-300 shrink-0">▼</div>
+            </div>
+
+            <div id="four-pairs-content" class="hidden mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs space-y-2">
+                    <span class="px-2.5 py-1 bg-indigo-50 text-indigo-700 rounded-lg font-bold inline-block">ខ្ទង់ទី ១៖ ប្រភពថាមពល</span>
+                    <div class="p-3 bg-slate-50 rounded-xl"><strong class="text-indigo-600 block mb-1">E (Extraversion)</strong>ទទួលថាមពលពីការជួបជុំ និងធ្វើសកម្មភាពជាមួយមនុស្សជុំវិញខ្លួន។</div>
+                    <div class="p-3 bg-slate-50 rounded-xl"><strong class="text-indigo-600 block mb-1">I (Introversion)</strong>ទទួលថាមពលពីការនៅម្នាក់ឯង ភាពស្ងប់ស្ងាត់ និងការគិតខាងក្នុងចិត្ត។</div>
+                </div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs space-y-2">
+                    <span class="px-2.5 py-1 bg-teal-50 text-teal-700 rounded-lg font-bold inline-block">ខ្ទង់ទី ២៖ របៀបទទួលព័ត៌មាន</span>
+                    <div class="p-3 bg-slate-50 rounded-xl"><strong class="text-teal-600 block mb-1">S (Sensing)</strong>ផ្តោតលើការពិតជាក់ស្តែង ព័ត៌មានលម្អិត និងអ្វីដែលប៉ះពាល់បានផ្ទាល់។</div>
+                    <div class="p-3 bg-slate-50 rounded-xl"><strong class="text-teal-600 block mb-1">N (Intuition)</strong>ផ្តោតលើគំនិតថ្មីៗ ការស្រមើស្រមៃ អត្ថន័យបង្កប់ និងអនាគត។</div>
+                </div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs space-y-2">
+                    <span class="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-lg font-bold inline-block">ខ្ទង់ទី ៣៖ ការសម្រេចចិត្ត</span>
+                    <div class="p-3 bg-slate-50 rounded-xl"><strong class="text-rose-600 block mb-1">T (Thinking)</strong>ប្រើហេតុផល តក្កវិជ្ជា និងភាពត្រឹមត្រូវជាគោលក្នុងការដោះស្រាយបញ្ហា។</div>
+                    <div class="p-3 bg-slate-50 rounded-xl"><strong class="text-rose-600 block mb-1">F (Feeling)</strong>ប្រើអារម្មណ៍ តម្លៃសីលធម៌ និងការយល់ចិត្តអ្នកដទៃជាគោល។</div>
+                </div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs space-y-2">
+                    <span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg font-bold inline-block">ខ្ទង់ទី ៤៖ របៀបរៀបចំជីវិត</span>
+                    <div class="p-3 bg-slate-50 rounded-xl"><strong class="text-amber-600 block mb-1">J (Judging)</strong>ចូលចិត្តផែនការ និងភាពច្បាស់លាស់។</div>
+                    <div class="p-3 bg-slate-50 rounded-xl"><strong class="text-amber-600 block mb-1">P (Perceiving)</strong>ចូលចិត្តភាពបត់បែន និងជម្រើស។</div>
+                </div>
+                <div class="sm:col-span-2 lg:col-span-4 bg-amber-50/70 rounded-2xl p-4 border border-amber-100 text-xs text-slate-700">
+                    <strong class="text-amber-900">📌 ចំណាំ៖</strong> J និង P មិនមានន័យថាមនុស្សម្នាក់ល្អ ឬអាក្រក់ក្នុងការរៀបចំទេ។ វាបង្ហាញពីទំនោររបៀបរៀបចំជីវិត និងការឆ្លើយតបចំពោះពិភពខាងក្រៅ។
+                </div>
+            </div>
+        </section>
+
+        <!-- ផ្នែកទី ៣៖ សៀវភៅណែនាំខួរក្បាល និងចិត្តគំនិត -->
+        <section>
+            <div onclick="toggleSection('benefits-content', 'benefits-arrow')" class="bento-card cursor-pointer bg-gradient-to-r from-white to-sky-50/70 hover:to-sky-50 rounded-3xl p-5 md:p-6 border border-sky-100 shadow-sm flex items-center justify-between gap-4 select-none">
+                <div class="flex items-center gap-4">
+                    <div class="text-2xl md:text-3xl bg-sky-100/80 text-sky-600 p-3.5 rounded-2xl shrink-0">📘</div>
+                    <div>
+                        <h2 class="text-base md:text-lg font-bold text-slate-900">សៀវភៅណែនាំខួរក្បាល និងចិត្តគំនិត</h2>
+                        <p class="text-xs md:text-sm text-sky-700/80 mt-0.5">ចុចត្រង់នេះ ដើម្បីមើលអត្ថប្រយោជន៍ទាំង ៦ យ៉ាង នៃការដឹងពី MBTI របស់ខ្លួនឯង</p>
+                    </div>
+                </div>
+                <div id="benefits-arrow" class="w-10 h-10 rounded-full bg-sky-50 flex items-center justify-center text-sky-600 transition-transform duration-300 shrink-0">▼</div>
+            </div>
+
+            <div id="benefits-content" class="hidden mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="md:col-span-3 bg-white rounded-3xl p-6 border border-slate-100 shadow-sm text-xs md:text-sm text-slate-600 leading-relaxed">
+                    ការដឹងពីប្រភេទ MBTI របស់ខ្លួនឯង គឺប្រៀបដូចជាការទទួលបាន <strong class="text-slate-900">«សៀវភៅណែនាំអំពីការប្រើប្រាស់ខួរក្បាល និងចិត្តគំនិតរបស់ខ្លួនឯង»</strong> យ៉ាងដូច្នោះដែរ។ វាមិនត្រឹមតែជួយឱ្យអ្នកស្គាល់ខ្លួនឯងប៉ុណ្ណោះទេ ប៉ុន្តែវាជួយផ្លាស់ប្តូររបៀបដែលអ្នករស់នៅ ធ្វើការ និងប្រាស្រ័យទាក់ទងជាមួយពិភពខាងក្រៅ។
+                </div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs"><strong class="text-slate-900 block text-sm mb-1">១. យល់ច្បាស់ពីចំណុចខ្លាំង និងខ្សោយ</strong><span class="text-slate-600">ដឹងថាខ្លួនពូកែខាងអ្វីពិតប្រាកដ និងកន្លែងណាត្រូវអភិវឌ្ឍ ដោយឈប់ប្រៀបធៀបខ្លួនឯងជាមួយអ្នកដទៃទាំងងងឹតងងុល។</span></div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs"><strong class="text-slate-900 block text-sm mb-1">២. ជ្រើសរើសអាជីពបានត្រឹមត្រូវ</strong><span class="text-slate-600">តម្រង់ទិសការសិក្សា និងបរិយាកាសការងារដែលស័ក្តិសមនឹងធម្មជាតិរបស់អ្នក ធ្វើឱ្យធ្វើការដោយរីករាយ។</span></div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs"><strong class="text-slate-900 block text-sm mb-1">៣. កែលម្អទំនាក់ទំនងសង្គម</strong><span class="text-slate-600">យល់ថាមនុស្សម្នាក់ៗមានរបៀបគិតខុសៗគ្នា ជួយកាត់បន្ថយការយល់ច្រឡំ និងជម្លោះក្នុងគ្រួសារ ឬការងារ។</span></div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs"><strong class="text-slate-900 block text-sm mb-1">៤. គ្រប់គ្រងស្ត្រេសត្រូវវិធី</strong><span class="text-slate-600">ដឹងច្បាស់ថាពេលណាត្រូវការនៅម្នាក់ឯង (I) ឬពេលណាត្រូវការជួបជុំមិត្តភក្តិ (E) ដើម្បីស្តារថាមពល។</span></div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs"><strong class="text-slate-900 block text-sm mb-1">៥. សម្រេចចិត្តមានតុល្យភាព</strong><span class="text-slate-600">ដឹងពីទំនោរធម្មជាតិ (T ឬ F) ដើម្បីថ្លឹងថ្លែងទាំងហេតុផល និងអារម្មណ៍ឱ្យបានគ្រប់ជ្រុងជ្រោយ។</span></div>
+                <div class="bg-white rounded-3xl p-5 border border-slate-100 shadow-sm text-xs"><strong class="text-slate-900 block text-sm mb-1">៦. បង្កើនប្រសិទ្ធភាពក្រុមការងារ</strong><span class="text-slate-600">ចេះបែងចែកតួនាទីគ្នាធ្វើតាមជំនាញពីកំណើត ដើម្បីនាំក្រុមទៅរកភាពជោគជ័យរួមគ្នា។</span></div>
+            </div>
+        </section>
+
+        <!-- ផ្នែកទី ៤៖ សិក្សាស៊ីជម្រៅ -->
+        <section>
+            <div onclick="toggleSection('love-content', 'love-arrow')" class="bento-card cursor-pointer bg-gradient-to-r from-white to-rose-50/70 hover:to-rose-50 rounded-3xl p-5 md:p-6 border border-rose-100 shadow-sm flex items-center justify-between gap-4 select-none">
+                <div class="flex items-center gap-4">
+                    <div class="text-2xl md:text-3xl bg-rose-100/80 text-rose-500 p-3.5 rounded-2xl shrink-0">❤️</div>
+                    <div>
+                        <h2 class="text-base md:text-lg font-bold text-slate-900">សិក្សាស៊ីជម្រៅ៖ ស្នេហា អារម្មណ៍លាក់កំបាំង និងការងារ</h2>
+                        <p class="text-xs md:text-sm text-rose-700/80 mt-0.5">ចុចត្រង់នេះ ដើម្បីមើលការវិភាគទាំង ៥ ចំណុច នៃក្រុមទាំង ៤ (NT, NF, SJ, SP)</p>
+                    </div>
+                </div>
+                <div id="love-arrow" class="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center text-rose-500 transition-transform duration-300 shrink-0">▼</div>
+            </div>
+
+            <div id="love-content" class="hidden mt-4 bg-white rounded-3xl p-5 md:p-6 border border-slate-100 shadow-sm">
+                <div class="flex flex-wrap gap-2 pb-4 mb-5 border-b border-slate-100">
+                    <button type="button" onclick="switchLoveTab(1)" id="ltab-1" class="love-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-rose-600 text-white">១. ការបង្ហាញក្តីស្រឡាញ់</button>
+                    <button type="button" onclick="switchLoveTab(2)" id="ltab-2" class="love-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">២. គូសមស្របក្នុងស្នេហា</button>
+                    <button type="button" onclick="switchLoveTab(3)" id="ltab-3" class="love-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">៣. ចំណុចខ្សោយ &amp; អារម្មណ៍លាក់</button>
+                    <button type="button" onclick="switchLoveTab(4)" id="ltab-4" class="love-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">៤. អាជីពសមស្របទាំង ៤ ក្រុម</button>
+                    <button type="button" onclick="switchLoveTab(5)" id="ltab-5" class="love-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-600">៥. ដៃគូដែលចង់បាន</button>
+                </div>
+
+                <div id="lpanel-1" class="love-panel space-y-3 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="p-3.5 rounded-2xl bg-emerald-50/70"><strong>🌿 INFJ – ស្រឡាញ់ដោយយល់ចិត្ត</strong><p class="mt-1 text-slate-700">ចង់បានស្នេហាមានអត្ថន័យ យកចិត្តទុកដាក់ខ្លាំង ឈឺចាប់ពេលគេមិនយល់ចិត្ត។</p></div>
+                        <div class="p-3.5 rounded-2xl bg-teal-50/70"><strong>🎨 INFP – ស្រឡាញ់ដោយបេះដូង</strong><p class="mt-1 text-slate-700">ចង់បានស្នេហាពិត រ៉ូមែនទិក ពិបាកបំភ្លេចមនុស្សដែលធ្លាប់ស្រឡាញ់។</p></div>
+                        <div class="p-3.5 rounded-2xl bg-sky-50/70"><strong>🤝 ISFJ – ស្រឡាញ់ដោយការថែរក្សា</strong><p class="mt-1 text-slate-700">ចងចាំរឿងតូចៗ បង្ហាញស្នេហាតាមសកម្មភាព និងចង់បានស្ថិរភាព។</p></div>
+                        <div class="p-3.5 rounded-2xl bg-amber-50/70"><strong>☀️ ENFJ – យកចិត្តទុកដាក់</strong><p class="mt-1 text-slate-700">លើកទឹកចិត្តដៃគូ និងចង់បានទំនាក់ទំនងដែលមានការផ្តល់ និងទទួល។</p></div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                        <div class="p-3 rounded-xl bg-purple-50"><strong>🧠 NT៖</strong> គាំទ្រ និងជួយដោះស្រាយបញ្ហា។</div>
+                        <div class="p-3 rounded-xl bg-sky-50"><strong>🛡️ SJ៖</strong> ទទួលខុសត្រូវ និងរក្សាពាក្យសន្យា។</div>
+                        <div class="p-3 rounded-xl bg-amber-50"><strong>🚀 SP៖</strong> ផ្តល់ពេលវេលា និងបទពិសោធន៍រួមគ្នា។</div>
+                    </div>
+                </div>
+
+                <div id="lpanel-2" class="love-panel hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                    <div class="p-3.5 rounded-2xl bg-emerald-50/70 space-y-1"><strong>🌿 NF (Diplomats)</strong><p>INFJ + ENFP: ភាពជ្រៅ + ភាពរស់រវើក</p><p>INFP + ENFJ: យល់ចិត្ត + យកចិត្តទុកដាក់</p><p>INFJ + INFP: យល់ចិត្តគ្នាខ្លាំង</p></div>
+                    <div class="p-3.5 rounded-2xl bg-purple-50/70 space-y-1"><strong>🧠 NT (Analysts)</strong><p>INTJ + ENTP: ជំរុញគំនិតគ្នា</p><p>INTJ + INTP: គិតជ្រៅ &amp; សេរីភាព</p><p>ENTJ + INTP: ទិសដៅ + ការវិភាគ</p></div>
+                    <div class="p-3.5 rounded-2xl bg-sky-50/70 space-y-1"><strong>🛡️ SJ (Sentinels)</strong><p>ISFJ + ESTJ: ថែរក្សា &amp; ទំនួលខុសត្រូវ</p><p>ISTJ + ESFJ: ស្ថិរភាព &amp; យកចិត្តទុកដាក់</p><p>ISFJ + ISTJ: ជីវិតស្ងប់ស្ងាត់មានរបៀប</p></div>
+                    <div class="p-3.5 rounded-2xl bg-amber-50/70 space-y-1"><strong>🚀 SP (Explorers)</strong><p>ISFP + ESFP: រស់នៅដោយធម្មជាតិ</p><p>ISTP + ESTP: សេរីភាព &amp; ការអនុវត្ត</p><p>ISFP + ISTP: មិនរឹតត្បិតគ្នា</p></div>
+                </div>
+
+                <div id="lpanel-3" class="love-panel hidden overflow-x-auto text-xs">
+                    <table class="w-full text-left border-collapse">
+                        <thead><tr class="bg-slate-100"><th class="p-2.5">ក្រុម</th><th class="p-2.5">ចំណុចខ្សោយ</th><th class="p-2.5">អារម្មណ៍លាក់កំបាំង</th><th class="p-2.5">ពេលមានបញ្ហាស្នេហា</th></tr></thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr><td class="p-2.5 font-bold">NT</td><td class="p-2.5">គិតច្រើន វិភាគខ្លាំង</td><td class="p-2.5">ខ្លាចបាត់បង់ការគ្រប់គ្រង</td><td class="p-2.5">ដកខ្លួនទៅគិត និងវិភាគបញ្ហា</td></tr>
+                            <tr><td class="p-2.5 font-bold">NF</td><td class="p-2.5">ងាយរងអារម្មណ៍ រំពឹងខ្ពស់</td><td class="p-2.5">ខ្លាចមិនត្រូវបានយល់</td><td class="p-2.5">ស្ងៀមស្ងាត់ គិតពីអ្វីដែលបានកើតឡើង</td></tr>
+                            <tr><td class="p-2.5 font-bold">SJ</td><td class="p-2.5">ប្រកាន់របៀប និងកាតព្វកិច្ច</td><td class="p-2.5">ខ្លាចបាត់បង់ស្ថិរភាព</td><td class="p-2.5">ចង់ដោះស្រាយឱ្យច្បាស់លាស់</td></tr>
+                            <tr><td class="p-2.5 font-bold">SP</td><td class="p-2.5">ធុញទ្រាន់នឹងការរឹតត្បិត</td><td class="p-2.5">ខ្លាចបាត់បង់សេរីភាព</td><td class="p-2.5">នៅម្នាក់ឯង ឬធ្វើអ្វីផ្សេងបន្ធូរអារម្មណ៍</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="lpanel-4" class="love-panel hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                    <div class="p-3.5 rounded-2xl bg-purple-50/70"><strong>🧠 NT – Analysts</strong><p class="mt-1">Business Analyst, Architect, Software Developer, Strategic Planner, Researcher</p></div>
+                    <div class="p-3.5 rounded-2xl bg-emerald-50/70"><strong>🌿 NF – Diplomats</strong><p class="mt-1">Interior Designer, Creative Director, Marketing &amp; Branding, Counselor, Content Creator</p></div>
+                    <div class="p-3.5 rounded-2xl bg-sky-50/70"><strong>🛡️ SJ – Sentinels</strong><p class="mt-1">Project Manager, Accountant, Administrator, Operations Manager, Quality Controller</p></div>
+                    <div class="p-3.5 rounded-2xl bg-amber-50/70"><strong>🚀 SP – Explorers</strong><p class="mt-1">Photographer, Video Editor, Sales, Entrepreneur, Product Designer</p></div>
+                </div>
+
+                <div id="lpanel-5" class="love-panel hidden space-y-4 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div class="p-3.5 rounded-2xl bg-purple-50/70"><strong>🧠 NT (Analysts)</strong><p class="mt-1">ឆ្លាតវៃ ឯករាជ្យ មានគោលដៅ</p></div>
+                        <div class="p-3.5 rounded-2xl bg-emerald-50/70"><strong>🌿 NF (Diplomats)</strong><p class="mt-1">យល់ចិត្ត កក់ក្តៅ ស្មោះត្រង់</p></div>
+                        <div class="p-3.5 rounded-2xl bg-sky-50/70"><strong>🛡️ SJ (Sentinels)</strong><p class="mt-1">ទទួលខុសត្រូវ មានស្ថិរភាព</p></div>
+                        <div class="p-3.5 rounded-2xl bg-amber-50/70"><strong>🚀 SP (Explorers)</strong><p class="mt-1">ធម្មជាតិ សប្បាយរីករាយ មិនរឹតត្បិត</p></div>
+                    </div>
+                    <div class="p-4 rounded-2xl bg-rose-50/70 space-y-1.5">
+                        <strong class="text-sm text-rose-950 block">💖 តើក្រុមណាដែលស្រឡាញ់បែបដែលមនុស្សភាគច្រើនប្រាថ្នា?</strong>
+                        <p class="text-slate-700">បើយកការយល់ចិត្ត ការស្មោះត្រង់ ការយកចិត្តទុកដាក់ និងការទទួលខុសត្រូវមករួមបញ្ចូលគ្នា នោះមនុស្សម្នាក់ត្រូវការលក្ខណៈល្អៗពីក្រុមទាំងបួន៖</p>
+                        <p>• ពី NT៖ ចេះគិត និងយល់ពីគ្នា។</p>
+                        <p>• ពី NF៖ ចេះយល់ចិត្ត និងផ្តល់ភាពកក់ក្តៅ។</p>
+                        <p>• ពី SJ៖ ចេះរក្សាពាក្យសន្យា និងទទួលខុសត្រូវ។</p>
+                        <p>• ពី SP៖ ចេះផ្តល់សេរីភាព និងភាពរីករាយ។</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Quiz Modal -->
+    <div id="quiz-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 md:p-8 shadow-2xl">
+            <div class="flex justify-between items-start gap-4 mb-4 pb-3 border-b border-slate-100">
+                <h2 class="text-xl font-bold text-slate-900">🎯 តេស្តវិភាគ MBTI លម្អិត (៨ សំណួរ)</h2>
+                <button type="button" onclick="toggleQuizModal()" class="text-slate-400 hover:text-slate-700 text-2xl leading-none">&times;</button>
+            </div>
+            <div id="quiz-questions" class="space-y-4 text-sm"></div>
+            <div class="pt-4 mt-4 border-t border-slate-100 flex justify-end gap-2">
+                <button type="button" onclick="toggleQuizModal()" class="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 text-sm font-semibold">បិទ</button>
+                <button type="button" onclick="submitQuiz()" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold">វិភាគ និងបង្ហាញលទ្ធផល</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ភ្ជាប់ JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
